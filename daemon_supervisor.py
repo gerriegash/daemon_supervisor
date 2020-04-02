@@ -86,7 +86,7 @@ def setup_logging(
     :param log_events:
         if events should be logged or not
     """
-    logging.basicConfig(level = logging.INFO, format = "%(asctime)s:%(levelname)s:%(message)s")
+    logging.basicConfig(level = logging.INFO, filename = "daemon_supervisor.log", format = "%(asctime)s:%(levelname)s:%(message)s")
     if not log_events:
         logging.disable()
 
