@@ -1,9 +1,10 @@
-from psutil import STATUS_STOPPED,STATUS_ZOMBIE,STATUS_DEAD,Process
+from psutil import STATUS_STOPPED, STATUS_ZOMBIE, STATUS_DEAD, Process
 import logging
 import setup
 
 PROCESS_COMMAND = None
 CURRENT_PROCESS = None
+
 
 def process_needs_restart():
     """Returns the status of process if it needs a restart or not
@@ -15,7 +16,7 @@ def process_needs_restart():
 
 
 def wait(
-    time_in_seconds
+        time_in_seconds
 ):
     """Makes the program sleep for certain time period
 
@@ -26,9 +27,10 @@ def wait(
     logging.info("Sleeping for {} seconds".format(time_in_seconds))
     sleep(time_in_seconds)
 
+
 def restart_the_process(
-    give_up_attempts,
-    restart_events_interval_seconds
+        give_up_attempts,
+        restart_events_interval_seconds
 ):
     """Restarts the process and in case the process does not restart, it tries again for a no of times before giving up.
 
@@ -42,9 +44,8 @@ def restart_the_process(
     no_of_checks_done = 0
 
     while no_of_checks_done < give_up_attempts and process_needs_restart():
-
-        create_the_process()# Restart the process
-        no_of_checks_done = no_of_checks_done + 1# Increment the no_of_checks_done
+        create_the_process()  # Restart the process
+        no_of_checks_done = no_of_checks_done + 1  # Increment the no_of_checks_done
         logging.info("Waiting after restart of process and trying again if unsuccessful")
         wait(restart_events_interval_seconds)
 
@@ -58,9 +59,10 @@ def restart_the_process(
         return False
     return True
 
+
 def keep_the_process_running(
-    give_up_attempts,
-    restart_events_interval_seconds
+        give_up_attempts,
+        restart_events_interval_seconds
 ):
     """Tries to keep the process running
 
@@ -72,23 +74,26 @@ def keep_the_process_running(
         True or False if the program was able to keep the service running
     """
 
-    if process_needs_restart() :
+    if process_needs_restart():
         logging.info("Restart needed for Process {}".format(get_current_process().name))
         return restart_the_process(give_up_attempts, restart_events_interval_seconds)
-    else :
+    else:
         return True
 
+
 def setup_logging(
-    log_events
+        log_events
 ):
     """Sets up the logging
 
     :param log_events:
         if events should be logged or not
     """
-    logging.basicConfig(level = logging.INFO, filename = "daemon_supervisor.log", format = "%(asctime)s:%(levelname)s:%(message)s")
+    logging.basicConfig(level=logging.INFO, filename="daemon_supervisor.log",
+                        format="%(asctime)s:%(levelname)s:%(message)s")
     if not log_events:
         logging.disable()
+
 
 def create_the_process():
     """Creates a new process from the command provided in arguments and terminates the previous not alive if any
@@ -99,31 +104,36 @@ def create_the_process():
     from subprocess import Popen
     import shlex
 
-    if not get_current_process() == None: # terminate existing process
+    if not get_current_process() == None:  # terminate existing process
         get_current_process().terminate()
 
-    proc = Popen(shlex.split(get_process_command())) # start a new one
+    proc = Popen(shlex.split(get_process_command()))  # start a new one
     process = Process(proc.pid)
     logging.info("Created a new process {}".format(process.name))
     set_current_process(process)
 
+
 def get_current_process():
     return CURRENT_PROCESS
 
+
 def set_current_process(
-    process
+        process
 ):
     global CURRENT_PROCESS;
-    CURRENT_PROCESS=process
+    CURRENT_PROCESS = process
+
 
 def get_process_command():
     return PROCESS_COMMAND
 
+
 def set_process_command(
-    process
+        process
 ):
     global PROCESS_COMMAND;
     PROCESS_COMMAND = process
+
 
 def parse_arguments():
     """Parse the arguments through command line
@@ -132,37 +142,38 @@ def parse_arguments():
         args array
     """
     from argparse import ArgumentParser
-    parser = ArgumentParser(description = "Run the Daemon Supervisor")
+    parser = ArgumentParser(description="Run the Daemon Supervisor")
     parser.add_argument("-c",
                         "--command",
-                        type = str,
-                        required = True,
-                        help = "Command for the process to be monitored")
+                        type=str,
+                        required=True,
+                        help="Command for the process to be monitored")
     parser.add_argument("-mi",
                         "--monitoring-events-interval-seconds",
-                        type = int,
-                        default = 11,
-                        help = "Seconds to wait until the Supervisor monitors the process again")
+                        type=int,
+                        default=11,
+                        help="Seconds to wait until the Supervisor monitors the process again")
     parser.add_argument("-ri",
                         "--restart-events-interval-seconds",
-                        type = int,
-                        default = 10,
-                        help = "Seconds to wait until the Supervisor monitors the process again")
+                        type=int,
+                        default=10,
+                        help="Seconds to wait until the Supervisor monitors the process again")
     parser.add_argument("-g",
                         "--give-up-attempts",
-                        type = int,
-                        default = 5,
-                        help = "Number of times the Supervisor should try restarting the process before giving up")
+                        type=int,
+                        default=5,
+                        help="Number of times the Supervisor should try restarting the process before giving up")
     parser.add_argument("-l",
                         "--log-events",
-                        type = bool,
-                        default = True,
-                        help = "Should log events in a separate file(daemon-supervisor.log)")
+                        type=bool,
+                        default=True,
+                        help="Should log events in a separate file(daemon-supervisor.log)")
     args = parser.parse_args()
 
     set_process_command(args.command)
 
     return args
+
 
 def run():
     """Main function"""
@@ -176,5 +187,6 @@ def run():
             logging.info("Waiting idle.")
             wait(args.monitoring_events_interval_seconds)
 
+
 if __name__ == "__main__":
-        run()
+    run()
